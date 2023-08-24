@@ -41,8 +41,8 @@ def Create_Msg_To_Send(type_msg):
             
         struct_in = constant.Frame_Msg(0x55, type_msg)
         data_out_len = message.Message_Create_Frame(struct_in, arr_out)
-        # print("Ask:")
-        # Print_Array(arr_out,data_out_len)
+        print("Ask:")
+        Print_Array(arr_out,data_out_len)
 
 # Tạo mảng fsm khi nhận được bytes từ STM         
 def Fsm_Arr_From_Receive():
@@ -53,7 +53,7 @@ def Fsm_Arr_From_Receive():
     
     while 1:
         datain = Receive_Data_From_Stm()
-
+        print(hex(datain), end= ' ')
         if(fsm_array_receive.Fsm_Test_Array_Receive(datain,fsm_arr_out) != 0): 
             break
         
@@ -124,8 +124,8 @@ class My_Ui():
         self.mainHandle.list_action.itemDoubleClicked.connect(self.Button_Click)
         
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.Main_Process)
+        # self.timer = QTimer()
+        # self.timer.timeout.connect(self.Button_Click)
         # # # self.timer.timeout.connect(self.Button_Click)
         
         
@@ -133,7 +133,8 @@ class My_Ui():
     def LoadLoginForm(self):
         self.loginUI.hide()
         self.mainUI.show()
-        self.timer.start(500)
+        
+        # self.timer.start(500)
         
         # self.timer.start(500)
 
@@ -169,14 +170,15 @@ class My_Ui():
 
         weigth_value = convert.Convert_Bytes_To_Float(struct_out.Data[:4])
         text = convert.Convert_Bytes_To_Text(struct_out.Data[4:])
-
+        print(text)
         
-        
+        self.Print_Action_Text(text)
         self.Print_Weight(weigth_value)
 
         
 
     def Button_Click(self,item):
+        
         
         # self.timer.start(500)
         action = "{}".format(item.text())
@@ -188,6 +190,7 @@ class My_Ui():
         elif(action == "Hold Action"):
             Create_Msg_To_Send(constant.Type_Msg.WEIGTH_HOLD_ASK.value)
             Send_Msg_To_Stm(arr_out)
+            
 
         elif(action == "Unhold Action"):
             Create_Msg_To_Send(constant.Type_Msg.WEIGTH_UNHOLD_ASK.value)
@@ -196,15 +199,18 @@ class My_Ui():
         elif(action ==  "Show Weight Action"):
             Create_Msg_To_Send(constant.Type_Msg.WEIGTH_ASK.value)
             Send_Msg_To_Stm(arr_out)
-        else:
-            pass
+        
+        
+        
+        
+        
         # print(action)
         
         
     
     #Quá trình chọn bản tin và thực hiện việc truyền nhận
     def Main_Process(self):
-            global flag
+            
             Fsm_Arr_From_Receive()
             
             if(fsm_array_receive.Fsm_Get_DataReady_Flag()):
@@ -214,9 +220,7 @@ class My_Ui():
         # self.timer.singleShot(500,self.Main_Process)
   
     
-    def main_all(self):
-        self.Button_Click()
-        self.Main_Process()
+
     # t1 = threading.Thread(target=Main_Process)
     # t1.start()
 
