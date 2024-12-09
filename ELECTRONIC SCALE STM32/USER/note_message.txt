@@ -1,0 +1,35 @@
+1. bên app vừa nhận vừa gửi, bên STM cũng vậy. Điểm khác biệt:
+	+ App:		gửi Ask, nhận Answer.
+	+ STM:		gửi Answer, nhận Ask.
+2. Xây dựng bản tin message.c:
+	Vì mỗi bên gửi / nhận khác nhau nên là xây 1 bản tin tổng quát, do đó mỗi bên sẽ có code bị thừa (không dùng đến)
+		+ Hàm Mes_Create_FrameStruct: tạo dữ liệu bản tin (chưa ở dạng khung truyền)
+		+ Hàm Mes_Create_FrameArray : tạo khung truyền dạng array để truyền qua USART, đầu vào là FrameStruct
+		+ Hàm Mes_Detect_FrameStruct: tách dữ liệu trên khung truyền array nhận được từ Fsm, lưu vào Struct.
+			Hàm này không có cũng được, có thể lấy luôn dữ liệu trên array mà không cần lưu vào Struct.
+			+ Hàm Copy_Data_From_Arr_To_Struct: sao chép dữ liệu weight_data từ array sang Struct
+		+ Hàm CheckSum				: tạo ra mã uint16_t để kiểm tra toàn bộ khung truyền array.
+			Copy nguyên code là được.
+		+ Hàm Mes_SendUsart_Message : gửi array qua USART, không dùng hàm USART_SendString được. Bên *.py tùy chỉnh sao cho gửi được.
+		+ dòng từ 181 đến hết không cần code (nó để in khi test thôi)
+		
+3. Xây dựng bản tin message.h:
+	+ Xem các #define về bản tin
+	+ Cấu trúc khung truyền:
+		Start
+		Type
+		Sensor: cảm biến gì
+			= loại sensor | thứ tự sensor
+		length_data: chiều dài dữ liệu
+			= weight_data + checksum_length
+		data[4]: weight_data
+		checksum: CRC 2 bytes
+		
+4. Xây dựng convert.c/.h
+	Tự đọc
+	
+5. Xây dựng Fsm
+	Fsm check từng ký tự một mỗi khi USART nhận được 1 ký tự, check đến cuối khung nếu thành công thì đóng gói array bằng cách set cờ lên 1
+	=> Vị trí đặt Fsm: trong ngắt nhận của STM, của Serial_Port bên App
+	Check thành công khi CheckSum nhận được bằng CheckSum tự tính
+	
