@@ -1,4 +1,5 @@
 import struct
+import constant
 import array as arr
 
 # Xây dựng mảng chứa 2 số dạng Bytes
@@ -26,7 +27,6 @@ def Convert_From_Uint16_To_Bytes(uint16_data):
     uint8_value.append(uint16_data[0])
     return len(uint8_value)
 
-
 def Convert_Bytes_To_Text(byte_data_text):
     text_data = list()
        
@@ -38,3 +38,11 @@ def Convert_Bytes_To_Text(byte_data_text):
     
     return result
 
+def Check_Sensor(sensor):
+    return sensor - constant.Sensor_Type_E.LOADCELL.value
+
+
+# a = 1.234
+# byte_value = Convert_Float_To_Bytes(a)
+# for i in range(4):
+#     print(hex(byte_value[i]),end = " ")

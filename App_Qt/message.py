@@ -1,123 +1,111 @@
 import constant
 import struct
-from constant import Type_Msg
 import convert
+from array import array
 
+def Message_Create_FrameStruct(frame_struct,type_msg,sensor):
+    frame_struct.Start_Frame = constant.START_BYTE
+    frame_struct.Type_Message = type_msg
+    frame_struct.Sensor = sensor
 
-def Message_Create_Frame(Data_in,Data_out):
+    match(frame_struct.Type_Message):
+        case constant.Type_Msg_E.WEIGTH_CALIB_ASK.value:
+            frame_struct.Length_Data = constant.WEIGTH_CALIB_ASK_LENGTH
 
-    # Kiểm tra Start_Frame có đúng không
-    if(Data_in.Start_Frame != constant.START_BYTE):
+        case constant.Type_Msg_E.WEIGTH_HOLD_ASK.value:
+            frame_struct.Length_Data = constant.WEIGTH_HOLD_ASK_LENGTH
+
+        case constant.Type_Msg_E.WEIGTH_UNHOLD_ASK.value:
+            frame_struct.Length_Data = constant.WEIGTH_UNHOLD_ASK_LENGTH
+        
+        case constant.Type_Msg_E.WEIGTH_ASK.value:
+            frame_struct.Length_Data = constant.WEIGTH_ASK_LENGTH
+        
+def Message_Create_Frame_Array(frame_struct, array_out):
+    if(frame_struct.Start_Frame != constant.START_BYTE):
         return 0
     
-    # Xác định kiểu bản tin để xác định độ dài bản tin
-    match(Data_in.Type_Message):
-        case Type_Msg.WEIGTH_CALIB_ASK.value:
-            Data_in.Length_Data = constant.WEIGTH_CALIB_ASK_LENGTH        # độ dài bản tin calib_ask
-        
-        case Type_Msg.WEIGTH_HOLD_ASK.value:
-            Data_in.Length_Data = constant.WEIGTH_HOLD_ASK_LENGTH         # độ dài bản tin hold_ask    
-        
-        case Type_Msg.WEIGTH_UNHOLD_ASK.value:
-            Data_in.Length_Data = constant.WEIGTH_UNHOLD_ASK_LENGTH       # độ dài bản tin unhold_ask    
-        
-        case Type_Msg.WEIGTH_ASK.value:
-            Data_in.Length_Data = constant.WEIGTH_ASK_LENGTH              # độ dài bản tin weight_ask
-        
-        case Type_Msg.WEIGTH_CALIB_ANWSER.value:
-            Data_in.Length_Data = constant.WEIGTH_CALIB_ANWSER_LENGTH     # độ dài bản tin weight_calib_answer
-            Data_in.Length_Text = constant.CALIB_ANWSER_TEXT_LENGTH       # độ dài bản tin text của weight_calib_answer
-
-        case Type_Msg.WEIGTH_HOLD_ANWSER.value:
-            Data_in.Length_Data = constant.WEIGTH_HOLD_ANWSER_LENGTH      # độ dài bản tin weight_hold_answer   
-            Data_in.Length_Text = constant.HOLD_ANWSER_TEXT_LENGTH        # độ dài bản tin text của weight_hold_answer
-        
-        case Type_Msg.WEIGTH_UNHOLD_ANWSER.value:
-            Data_in.Length_Data = constant.WEIGTH_UNHOLD_ANWSER_LENGTH    # độ dài bản tin weight_unhold_answer   
-            Data_in.Length_Text = constant.UNHOLD_ANWSER_TEXT_LENGTH      # độ dài bản tin text của weight_unhold_answer  
-
-        case Type_Msg.WEIGTH_ANWSER.value:
-            Data_in.Length_Data = constant.WEIGTH_ANWSER_LENGTH           # độ dài bản tin weight_answer   
-            Data_in.Length_Text = constant.WEIGHT_ANWSER_TEXT_LENGTH      # độ dài bản tin text của weight_answer
+    array_out.append(frame_struct.Start_Frame)
+    array_out.append(frame_struct.Type_Message)
+    array_out.append(frame_struct.Sensor)
     
-    # Tạo mảng đầu ra cho bản tin
-    
-    Data_out.append(Data_in.Start_Frame)
-    Data_out.append(Data_in.Type_Message)
+    if(frame_struct.Length_Data == 2):
+        #Gán giá trị của Length_Data vào trong mảng
+        data_len = struct.pack('B',frame_struct.Length_Data)
+        array_out.append(data_len[0])
 
-    if Data_in.Length_Data == 2:                                        # Bản tin ASK_WEIGHT
-        # Gán giá trị của Length_Data vào trong mảng
-        data_len    = struct.pack('H',Data_in.Length_Data)
-        Data_out.append(data_len[0])
-        Data_out.append(data_len[1])
-        
-        # Gán giá trị của Check_Frame vào trong mảng
-        Data_in.Check_Frame = check_sum(Data_out,len(Data_out))
-        crc = struct.pack('H',Data_in.Check_Frame)
-        Data_out.append(crc[0])
-        Data_out.append(crc[1])
-    else:                                                               # Bản tin ASK_WEIGHT
-         # Gán giá trị của Length_Data và Length_Text vào trong mảng
-        data_len = struct.pack('BB',Data_in.Length_Data, Data_in.Length_Text)
-        Data_out.append(data_len[0])
-        Data_out.append(data_len[1])
+        check_sum = Check_Sum(array_out, constant.DEFAULT_LENGTH)
+        array_out.append(check_sum & 0xff)
+        array_out.append((check_sum >> 8) & 0xff)
 
-        # Gán giá trị của Weight_Data và Text_Data vào trong mảng 
-        for i in range(Data_in.Length_Data - 2):
-            Data_out.append(Data_in.Data[i])
-        
-        # Gán giá trị của check frame vào trong mảng
-        Data_in.Check_Frame = check_sum(Data_out,len(Data_out))
-        crc = struct.pack('H',Data_in.Check_Frame)
-        Data_out.append(crc[0])
-        Data_out.append(crc[1])
+    return len(array_out)
 
-    return len(Data_out)
-
-def Message_Detect_Frame(Data_in,Data_out):
+def Message_Detect_Frame(array_in,frame_struct):
     datain_index = 0
-    if(Data_in[datain_index] != constant.START_BYTE):
+    if(array_in[datain_index] != constant.START_BYTE):
         return 0
     
-    Data_out.Start_Frame = Data_in[datain_index]
+    frame_struct.Start_Frame = array_in[datain_index]
     datain_index += 1
     
-    Data_out.Type_Message = Data_in[datain_index]
+    frame_struct.Type_Message = array_in[datain_index]
     datain_index += 1
     
-    Data_out.Length_Data = Data_in[datain_index]
+    frame_struct.Sensor = array_in[datain_index]
     datain_index += 1
     
-    Data_out.Length_Text = Data_in[datain_index]
+    frame_struct.Length_Data = array_in[datain_index]
     datain_index += 1
 
-    match(Data_out.Type_Message):
-        case Type_Msg.WEIGTH_CALIB_ANWSER.value:
-            datain_index = Copy_Data_From_Arr_To_Struct(Data_in,Data_out,datain_index)
-        case Type_Msg.WEIGTH_HOLD_ANWSER.value:
-            datain_index = Copy_Data_From_Arr_To_Struct(Data_in,Data_out,datain_index)
-        case Type_Msg.WEIGTH_UNHOLD_ANWSER.value:
-            datain_index = Copy_Data_From_Arr_To_Struct(Data_in,Data_out,datain_index)
-        case Type_Msg.WEIGTH_ANWSER.value:
-            datain_index = Copy_Data_From_Arr_To_Struct(Data_in,Data_out,datain_index)
+    match(frame_struct.Type_Message):
+        case constant.Type_Msg_E.WEIGTH_CALIB_ANWSER.value:
+            datain_index = Copy_Data_From_Arr_To_Struct(array_in,frame_struct,datain_index)
+        case constant.Type_Msg_E.WEIGTH_HOLD_ANWSER.value:
+            datain_index = Copy_Data_From_Arr_To_Struct(array_in,frame_struct,datain_index)
+        case constant.Type_Msg_E.WEIGTH_UNHOLD_ANWSER.value:
+            datain_index = Copy_Data_From_Arr_To_Struct(array_in,frame_struct,datain_index)
+        case constant.Type_Msg_E.WEIGTH_ANWSER.value:
+            datain_index = Copy_Data_From_Arr_To_Struct(array_in,frame_struct,datain_index)
 
-    Data_out.Check_Frame = convert.Convert_From_Bytes_To_Uint16(Data_in[datain_index], Data_in[datain_index + 1])
+    frame_struct.Check_Frame = convert.Convert_From_Bytes_To_Uint16(array_in[datain_index], array_in[datain_index + 1])
     datain_index += 2
-    return datain_index-2-4
+    return datain_index
 
 
-def Copy_Data_From_Arr_To_Struct(Data_in,Data_out, current_index):
-    del Data_out.Data[:]
-    new_index = Data_out.Length_Data + constant.DEFAULT_LENGTH - 2
-    index = current_index
-    for i in range(new_index - 4 ):
-        Data_out.Data.append(Data_in[index])
-        index += 1
-    return new_index
-        
+def Copy_Data_From_Arr_To_Struct(data_in,data_out, temp_index):
+    del data_out.Data[:]
+    data_out.Data.append(data_in[temp_index])
+    temp_index += 1
+    data_out.Data.append(data_in[temp_index])
+    temp_index += 1
+    data_out.Data.append(data_in[temp_index])
+    temp_index += 1
+    data_out.Data.append(data_in[temp_index])
+    temp_index += 1
+    return temp_index
 
+# in mảng
+def Print_Array(arr,arr_len):
+    
+    for i in range(arr_len):
+        print(hex(arr[i]), end=' ')
+    print('\n')
 
-def check_sum(buf, length):
+# in các thành phần có trong struct
+def Print_Struct(struct, len_data):
+
+    print("Start Frame:", hex(struct.Start_Frame))
+    print("Type_Message:", hex(struct.Type_Message))
+    print("Sensor:", hex(struct.Sensor))
+    print("Length_Data:", hex(struct.Length_Data))
+    print("Data:", end= ' ')
+    for i in range(len_data):
+        print(hex(struct.Data[i]), end=' ')
+    
+    print('\n')
+    print("Check_Frame:", hex(struct.Check_Frame))
+
+def Check_Sum(buf, length):
     crc = 0xFFFF
     for pos in range(length):
         crc ^= buf[pos]  # XOR byte into least sig. byte of crc
@@ -129,7 +117,10 @@ def check_sum(buf, length):
                 crc >>= 1  # Just shift right
     return crc
 
-    
 
+# array_receive = array('B',[0xAA, 0x08, 0x11, 0x06, 0xb6, 0xf3, 0x9d, 0x3f, 0x36, 0x76])
+# struct_out = constant.Frame_Msg_T()
 
- 
+# length = Message_Detect_Frame(array_receive,struct_out)
+# print(length)
+# Print_Struct(struct_out, 4)
