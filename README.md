@@ -13,12 +13,13 @@ hiển thị kết quả lên màn hình LCD và máy tính, và có một số 
 - Qt Desginer
 ## Sơ đồ khối
 <img src="https://github.com/Daiiingc/App_For_Scale/blob/main/image/Block_Diagram.png">
-# ELECTRONIC SCALE STM32
+
+## ELECTRONIC SCALE STM32
 - Source code: [ELECTRONIC_SCALE_STM32](https://github.com/Daiiingc/App_For_Scale/tree/main/ELECTRONIC_SCALE_STM32) 
 - Folder MDK chứa file keilC để build chương trình và nạp code
 - Folder USER chứa file code các thành phần cứng và phần trao đổi bản tin giữa STM32 và app thông qua USART
 - Folder REFERENCE chứa các thông tin tìm hiểu để làm xây dựng mô hình phần cứng
-# QT APP
+## QT APP
 - Source code: [App_Qt](https://github.com/Daiiingc/App_For_Scale/tree/main/App_Qt) 
 - Thiết kế giao diện app trên phần mềm Qt Desginer
 - Convert file .ui đó thành file .py và lập trình phần logic cho app trên vscode
