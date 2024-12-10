@@ -1,4 +1,4 @@
-# ELETRONIC SCALE AND QT APP
+# ELECTRONIC SCALE AND QT APP
 Project tạo ra một mô hình cân điện tử để đo khối lượng vật, 
 hiển thị kết quả lên màn hình LCD và máy tính, và có một số chức năng điều khiển bằng nút bấm.
 ## Thành phần cứng:
@@ -12,9 +12,9 @@ hiển thị kết quả lên màn hình LCD và máy tính, và có một số 
 - vscode code app QT
 - Qt Desginer
 ## Sơ đồ khối
-<img src="https://github.com/Daiiingc/App_For_Scale/blob/main/image/Block%20Diagram.png">
-## ELETRONIC SCALE với STM32
-- Source code:[STM32](https://github.com/Daiiingc/App_For_Scale/tree/main/ELECTRONIC%20SCALE%20STM32) 
+<img src="https://github.com/Daiiingc/App_For_Scale/blob/main/image/Block_Diagram.png">
+## ELECTRONIC SCALE với STM32
+- Source code:[STM32](https://github.com/Daiiingc/App_For_Scale/tree/main/ELECTRONIC_SCALE_STM32) 
 - Folder MDK chứa file keilC để build chương trình và nạp code
 - Folder USER chứa file code các thành phần cứng và phần trao đổi bản tin giữa STM32 và app thông qua USART
 - Folder REFERENCE chứa các thông tin tìm hiểu để làm xây dựng mô hình phần cứng
@@ -25,3 +25,6 @@ hiển thị kết quả lên màn hình LCD và máy tính, và có một số 
 - Sử dụng thư viện PyQt5 để code và chạy chương trình phần mềm
 - Sử dụng thư viện pyserial để trao đổi bản tin dữ liệu giữa app PyQt5 và stm32
 - Sau khi hoàn thành thì đóng gói lại vào một file exe để chạy app (File lưu trong folder dist)
+- Hình ảnh giao diện app:
+<img src="https://github.com/Daiiingc/App_For_Scale/blob/main/image/login_image.png">
+<img src="https://github.com/Daiiingc/App_For_Scale/blob/main/image/app_image.png">
