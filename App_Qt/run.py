@@ -99,6 +99,9 @@ class My_Ui(QMainWindow):
         self.mainHandle = MAIN_HANDLE(self.mainUI)
         
         self.mainHandle.list_action.itemDoubleClicked.connect(self.Button_Click)
+
+        self.mainHandle.label_weigth.setText('0')
+        self.mainHandle.label_unit.setText("g")
     
     # Viết tin của bản tin answer được nhận
     def Print_Action_Text(self, text):

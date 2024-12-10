@@ -310,7 +310,7 @@ color: rgb(0, 0, 0);
           <enum>QFrame::NoFrame</enum>
          </property>
          <property name="text">
-          <string/>
+          <string>0</string>
          </property>
          <property name="textFormat">
           <enum>Qt::PlainText</enum>
@@ -388,7 +388,7 @@ color: rgb(0, 0, 0);
 </string>
          </property>
          <property name="text">
-          <string/>
+          <string>g</string>
          </property>
         </widget>
        </item>
